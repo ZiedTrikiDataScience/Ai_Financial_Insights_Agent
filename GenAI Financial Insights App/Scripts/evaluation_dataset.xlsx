@@ -1,0 +1,64 @@
+import os
+import requests
+import pandas as pd
+from dotenv import load_dotenv
+from pathlib import Path
+from transformers import pipeline
+
+# 0) Clés
+load_dotenv()
+guardian_api_key = os.getenv("GUARDIAN_API_KEY")
+if not guardian_api_key:
+    raise ValueError("Missing GUARDIAN_API_KEY in .env file.")
+
+# 1) Scrape Guardian (bodyText + trailText)
+endpoint = "https://content.guardianapis.com/search"
+params = {
+    "q": "financial news",
+    "section": "business",
+    "from-date": "2023-01-01",
+    "to-date": pd.to_datetime("today").strftime("%Y-%m-%d"),
+    "show-fields": "bodyText,trailText",
+    "page-size": 50,   # augmente si tu veux
+    "api-key": guardian_api_key
+}
+resp = requests.get(endpoint, params=params)
+resp.raise_for_status()
+articles = resp.json()["response"]["results"]
+
+rows = [
+    {
+        "scraped_article": a.get("fields", {}).get("bodyText", ""),
+        "expected_output": a.get("fields", {}).get("trailText", "")
+    }
+    for a in articles
+]
+df = pd.DataFrame(rows)
+
+# 2) Ajout de la 3e colonne: bart_summary
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn", framework="pt")
+
+def summarize_text(text: str) -> str:
+    if not isinstance(text, str) or not text.strip():
+        return ""
+    text = text.replace("\n", " ").strip()[:4000]
+    try:
+        out = summarizer(text, max_length=150, min_length=40, do_sample=False)
+        return out[0]["summary_text"].strip()
+    except Exception:
+        return ""
+
+print("⏳ Génération des résumés BART…")
+df["bart_summary"] = df["scraped_article"].apply(summarize_text)
+
+# 3) Vérifications console
+print("Colonnes du DataFrame :", list(df.columns))
+print("Aperçu :")
+print(df.head(3))
+
+# 4) Sauvegarde sous un NOUVEAU nom
+out_path = Path(__file__).parent / "ground_truth_with_bart.xlsx"
+df.to_excel(out_path, index=False)
+
+print(f"✅ Fichier Excel généré : {out_path.resolve()}")
+print(f"Nombre de lignes : {len(df)}")

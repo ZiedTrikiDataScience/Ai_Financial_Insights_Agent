@@ -1,7 +1,3 @@
-AI Financial Insights Generator Agent 
-
-Steps to install it : 
-
 1* Open the terminal in the project directory
 
 2* Create a virtual environment :

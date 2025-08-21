@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genai_insights_and_llm_sentiment-analysis_app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: genai_insights_and_llm_sentiment-analysis_app
+  template:
+    metadata:
+      labels:
+        app: genai_insights_and_llm_sentiment-analysis_app
+    spec:
+      containers:
+      - name: genai_insights_and_llm_sentiment-analysis_app
+        image: genai_insights_and_llm_sentiment-analysis_app:latest
+        ports:
+        - containerPort: 9696
