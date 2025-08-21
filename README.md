@@ -16,3 +16,16 @@ Steps to install it :
 
     pip install -r requirements.txt
 
+
+
+* Example Generated Themes : 
+
+Theme 1: Automotive, Trade, Insolvency Trends
+
+Theme 2: Market Movements Amid Geopolitics
+
+Theme 3: Retailer restructures to avoid collapse
+
+Theme 4: Financial Compliance Enforcement
+
+Theme 5: Economic policy amid geopolitical tensions
