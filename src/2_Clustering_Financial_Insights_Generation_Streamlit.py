@@ -381,8 +381,8 @@ if st.button("🚀 Run Full Pipeline", type='primary', use_container_width=True)
         {joined}
         """
         res = client.chat.completions.create(
-            model="qwen/qwen3-coder:free",
-            #deepseek/deepseek-chat-v3.1:free
+            model="deepseek/deepseek-chat-v3.1:free",
+            #qwen/qwen3-coder:free
             messages=[{"role": "user", "content": prompt}],
             extra_headers={"HTTP-Referer": "https://openrouter.ai", "X-Title": "Theme Label"}
         )
@@ -394,6 +394,15 @@ if st.button("🚀 Run Full Pipeline", type='primary', use_container_width=True)
     st.write("### \U0001F9E0 Interpreted Labels:")
     for tid, label in theme_names.items():
         st.markdown(f"**Theme {tid + 1}:** {label}")
+
+    # 🔹 Save clustered + labeled data to Excel
+    df["theme"] = df["theme_id"].map(theme_names)
+    labeled_excel_path = "clustered_articles_with_themes.xlsx"
+    df[["article_content", "summary", "theme"]].to_excel(labeled_excel_path, index=False)
+
+    with open(labeled_excel_path, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+        st.markdown(f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="clustered_articles_with_themes.xlsx">⬇️ Download Clustered Articles with Themes</a>', unsafe_allow_html=True)
 
     # Step 4: Generate Insights & PDF
     def generate_insight(texts, tid):
