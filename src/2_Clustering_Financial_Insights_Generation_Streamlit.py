@@ -54,7 +54,7 @@ to_date = st.sidebar.date_input("To Date", pd.to_datetime("today"))
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**API keys loaded from .env**")
-def find_best_k(embeddings, k_min=2, k_max=8):
+def find_best_k(embeddings, k_min=2, k_max=5):
     scores = []
     k_values = list(range(k_min, k_max + 1))
     for k in k_values:
@@ -111,7 +111,7 @@ if st.button("\U0001F680 Run Full Pipeline", type='primary', use_container_width
     embedder = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
     embeddings = embedder.encode(df["summary"].tolist(), convert_to_numpy=True)
     best_k, elbow_plot = find_best_k(embeddings)
-    st.image(elbow_plot, caption=f"Optimal number of clusters: {best_k}", use_column_width=True)
+    st.image(elbow_plot, caption=f"Optimal number of clusters: {best_k}", use_container_width=True)
     
     st.write("### \U0001F913 The best number of clusters is : ", best_k)
 
@@ -145,7 +145,7 @@ if st.button("\U0001F680 Run Full Pipeline", type='primary', use_container_width
         {joined}
         """
         res = client.chat.completions.create(
-            model="openai/gpt-oss-20b:free",
+            model="deepseek/deepseek-chat-v3.1:free",
             messages=[{"role": "user", "content": prompt}],
             extra_headers={"HTTP-Referer": "https://openrouter.ai", "X-Title": "Theme Label"}
         )
@@ -154,7 +154,7 @@ if st.button("\U0001F680 Run Full Pipeline", type='primary', use_container_width
         theme_names[tid] = clean_output.strip()
 
     st.success("Theme labels generated.")
-    st.write("### \U0001F9E0 Interpreted Themes:")
+    st.write("### \U0001F9E0 Interpreted Labels:")
     for tid, label in theme_names.items():
         st.markdown(f"**Theme {tid + 1}:** {label}")
 
@@ -177,7 +177,7 @@ better financial decisions.
 Each section should be clearly labeled.
 """
         r = client.chat.completions.create(
-            model="deepseek/deepseek-chat",
+            model="deepseek/deepseek-chat-v3.1:free",
             messages=[{"role": "user", "content": prompt}],
             extra_headers={"HTTP-Referer": "https://openrouter.ai", "X-Title": "Insight Gen"}
         )
