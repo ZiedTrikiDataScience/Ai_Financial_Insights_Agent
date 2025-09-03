@@ -18,6 +18,7 @@ import textwrap
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import re
+import torch
 
 # Load environment variables
 load_dotenv()
@@ -35,6 +36,19 @@ st.set_page_config(page_title="Investor Thematic Report Generator", layout="wide
 st.title("📊 Investor Thematic Report Generator")
 st.markdown("Generate polished, investor-grade PDF reports from financial news summaries.")
 
+
+if torch.cuda.is_available():
+    st.success(f"✅ CUDA available: {torch.cuda.get_device_name(0)}")
+else:
+    st.error("❌ CUDA not available, running on CPU")
+
+print(torch.version.cuda) 
+print('\n')       # should print CUDA version
+print(torch.cuda.is_available()) # should print True
+print('\n')
+print(torch.cuda.get_device_name(0)) # your GPU name
+print('\n')
+
 # Image Banner
 image_path = Path(r"C:\Users\triki\Desktop\MLOps and GenAi\Ai_Financial_Insights_Agent\images\fin_insights.png")
 if image_path.exists():
@@ -46,7 +60,7 @@ from_date = st.sidebar.date_input("From Date", pd.to_datetime("2023-01-01"))
 to_date = st.sidebar.date_input("To Date", pd.to_datetime("today"))
 
 # Helper: Find Best K
-def find_best_k(embeddings, k_min=2, k_max=5):
+def find_best_k(embeddings, k_min=2, k_max=7):
     scores = []
     k_values = list(range(k_min, k_max + 1))
     for k in k_values:
@@ -79,7 +93,7 @@ if st.button("🚀 Run Full Pipeline", type='primary', use_container_width=True)
         "from-date": from_date.isoformat(),
         "to-date": to_date.isoformat(),
         "show-fields": "bodyText,webPublicationDate",
-        "page-size": 10,
+        "page-size": 100,
         "api-key": guardian_api_key
     }
     resp = requests.get(endpoint, params=params)
@@ -94,7 +108,7 @@ if st.button("🚀 Run Full Pipeline", type='primary', use_container_width=True)
 
     # Step 2: Summarization
     st.subheader("Step 2: Summarize Articles")
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn", framework="pt")
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn", framework="pt" , device=0 )  # 0 = GPU, -1 = CPU
     df["summary"] = df["article_content"].apply(
         lambda t: summarizer(t[:4000], max_length=150, min_length=40, do_sample=False)[0]["summary_text"]
     )
@@ -102,7 +116,7 @@ if st.button("🚀 Run Full Pipeline", type='primary', use_container_width=True)
 
     # Step 3: Clustering
     st.subheader("Step 3: Embeddings & Clustering")
-    embedder = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    embedder = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2" , device="cuda")
     embeddings = embedder.encode(df["summary"].tolist(), convert_to_numpy=True)
     best_k, elbow_plot = find_best_k(embeddings)
     st.image(elbow_plot, caption=f"Optimal clusters: {best_k}", use_container_width=True)
