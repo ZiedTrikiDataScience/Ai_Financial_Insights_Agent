@@ -1,0 +1,37 @@
+# .dockerignore
+.git
+.gitignore
+.vscode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+.envrc
+venv/
+.venv
+.venv/
+genai_financial_app
+genai_financial_app/
+.env/
+*.db
+data/
+models/
+*.h5
+*.pt
+*.ckpt
+.cache/
+node_modules/
+logs/
+tests/
+
+Deployed_Data
+Deployed_Data/
+
+Extra files
+Extra files/
+
+Scraped_And_Summarised_Data
+Scraped_And_Summarised_Data/
+

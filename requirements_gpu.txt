@@ -27,11 +27,13 @@ comm==0.2.2
 contourpy==1.3.3
 cycler==0.12.1
 dataclasses-json==0.6.7
+datasets==4.0.0
 ddgs==9.2.3
 debugpy==1.8.12
 decorator==5.1.1
 defusedxml==0.7.1
 Deprecated==1.2.18
+dill==0.3.8
 dirtyjson==1.0.8
 distro==1.9.0
 docutils==0.19
@@ -46,7 +48,7 @@ fonttools==4.58.0
 fpdf==1.7.2
 fpdf2==2.8.3
 frozenlist==1.7.0
-fsspec==2025.5.1
+fsspec==2025.3.0
 gitdb==4.0.12
 GitPython==3.1.44
 google-auth==2.40.3
@@ -118,6 +120,7 @@ mdurl==0.1.2
 mmh3==5.1.0
 mpmath==1.3.0
 multidict==6.6.3
+multiprocess==0.70.16
 mypy_extensions==1.1.0
 narwhals==1.41.0
 nest-asyncio==1.6.0
@@ -172,7 +175,7 @@ pyspark==3.5.4
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 pytz==2025.2
-pywin32==308
+pywin32==308; platform_system == "Windows"
 PyYAML==6.0.2
 pyzmq==26.2.1
 referencing==0.36.2
@@ -225,6 +228,7 @@ websocket-client==1.8.0
 websockets==15.0.1
 win32_setctime==1.2.0
 wrapt==1.17.2
+xxhash==3.5.0
 yarl==1.20.1
 zipp==3.23.0
 zstandard==0.23.0

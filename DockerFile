@@ -1,25 +1,140 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11.9-slim
+# # ============================================================
+# # Stage 1: Builder
+# # Purpose: Build Python wheels for all dependencies so we can
+# #          install them later without compiling from source.
+# # ============================================================
 
-# Set the working directory in the container
-WORKDIR /app
+# FROM python:3.11.0-slim AS builder
 
-# Copy the current directory contents into the container at /usr/src/app
-COPY . .
+# LABEL maintainer="triki.zied.aiesec@gmail.com" \
+#       description="Financial Insights Clustering - Builder Stage" \
+#       version="1.0"
 
-# Install system dependencies
+# ENV PYTHONUNBUFFERED=1 \
+#     PIP_NO_CACHE_DIR=0
+
+# WORKDIR /build
+
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#         build-essential \
+#     && rm -rf /var/lib/apt/lists/*
+
+# COPY requirements.txt .
+
+# RUN pip install --upgrade pip setuptools wheel && \
+#     pip wheel --no-cache-dir -w /wheels -r requirements.txt
+
+
+# # ============================================================
+# # Stage 2: Runtime
+# # Purpose: Minimal final image with only what’s needed to run.
+# # ============================================================
+# FROM python:3.11.0-slim
+
+# LABEL maintainer="triki.zied.aiesec@gmail.com" \
+#       description="Financial Insights Clustering Streamlit Image" \
+#       version="1.0"
+
+# # ✅ Change port to 8502 so it won’t conflict with your RAG app
+# ENV PYTHONUNBUFFERED=1 \
+#     PYTHONDONTWRITEBYTECODE=1 \
+#     PIP_NO_CACHE_DIR=1 \
+#     PIP_DISABLE_PIP_VERSION_CHECK=1 \
+#     STREAMLIT_SERVER_PORT=8502 \
+#     STREAMLIT_SERVER_ADDRESS=0.0.0.0
+
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#         curl \
+#     && rm -rf /var/lib/apt/lists/*
+
+# RUN groupadd --gid 1000 appuser && \
+#     useradd --uid 1000 --gid appuser --shell /bin/bash --create-home appuser
+
+# WORKDIR /app
+
+# COPY --from=builder /wheels /wheels
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
+#     && rm -rf /wheels \
+#     && rm -rf /root/.cache /home/appuser/.cache
+
+# COPY --chown=appuser:appuser . /app
+
+# RUN mkdir -p /app/logs /app/data && chown -R appuser:appuser /app
+
+# USER appuser
+
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+#     CMD curl -f http://localhost:8502/_stcore/health || exit 1
+
+# # ✅ Expose new port
+# EXPOSE 8502
+
+# # ✅ Run the script from src folder
+# CMD ["streamlit", "run", "src/2_Clustering_Financial_Insights_Generation_Streamlit.py", \
+#      "--server.address", "0.0.0.0", \
+#      "--server.port", "8502", \
+#      "--server.headless", "true", \
+#      "--server.fileWatcherType", "none", \
+#      "--browser.serverAddress", "localhost"]
+
+
+# ============================================================
+# Runtime image
+# ============================================================
+FROM python:3.11-slim
+
+LABEL maintainer="triki.zied.aiesec@gmail.com" \
+      description="Financial Insights Clustering Streamlit Image" \
+      version="1.0"
+
+# ✅ Environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    STREAMLIT_SERVER_PORT=8502 \
+    STREAMLIT_SERVER_ADDRESS=0.0.0.0
+
+# Install minimal OS packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    python3-dev \
+        curl \
+        libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
+
+# Create non-root user
+RUN groupadd --gid 1000 appuser && \
+    useradd --uid 1000 --gid appuser --shell /bin/bash --create-home appuser
+
+WORKDIR /app
+
+# Copy requirements and install dependencies directly
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && rm -rf /root/.cache /home/appuser/.cache
 
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy only app code
+COPY --chown=appuser:appuser . /app
 
-COPY . .
+# Create logs/data directories
+RUN mkdir -p /app/logs /app/data && chown -R appuser:appuser /app
 
-EXPOSE 9696
+# Switch to non-root user
+USER appuser
 
-CMD ["waitress-serve" ,"--listen=0.0.0.0:9696" ,"app:app"]
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8502/_stcore/health || exit 1
+
+# Expose Streamlit port
+EXPOSE 8502
+
+# Run Streamlit
+CMD ["streamlit", "run", "src/2_Clustering_Financial_Insights_Generation_Streamlit.py", \
+     "--server.address", "0.0.0.0", \
+     "--server.port", "8502", \
+     "--server.headless", "true", \
+     "--server.fileWatcherType", "none", \
+     "--browser.serverAddress", "localhost"]
+

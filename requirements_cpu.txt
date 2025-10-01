@@ -168,7 +168,7 @@ pyspark==3.5.4
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.0
 pytz==2025.2
-pywin32==308
+pywin32==308; platform_system == "Windows"
 PyYAML==6.0.2
 pyzmq==26.2.1
 referencing==0.36.2
@@ -199,9 +199,9 @@ threadpoolctl==3.6.0
 tiktoken==0.9.0
 tokenizers==0.21.1
 toml==0.10.2
-torch==2.7.0
-torchaudio==2.7.1+cpu
-torchvision==0.22.1+cpu
+torch==2.7.1
+torchaudio==2.7.1
+torchvision==0.18.1
 tornado==6.4.2
 tqdm==4.67.1
 traitlets==5.14.3
