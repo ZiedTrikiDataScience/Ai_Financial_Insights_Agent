@@ -898,7 +898,7 @@ if run_pipeline:
         {joined}
         """
         res = client.chat.completions.create(
-            model="deepseek/deepseek-chat-v3.1:free",
+            model="deepseek/deepseek-chat:floor",
             messages=[{"role": "user", "content": prompt}],
             extra_headers={"HTTP-Referer": "https://openrouter.ai", "X-Title": "Theme Label"}
         )
@@ -956,7 +956,7 @@ if run_pipeline:
         **Implications for Investors**
         """
         r = client.chat.completions.create(
-            model="deepseek/deepseek-chat-v3.1:free",
+            model="deepseek/deepseek-chat:floor",
             messages=[{"role": "user", "content": prompt}]
         )
         return r.choices[0].message.content.strip()
@@ -1031,7 +1031,7 @@ if run_pipeline:
         """
         
         judge_res = client.chat.completions.create(
-            model="google/gemma-3n-e2b-it:free",
+            model="google/gemma-2-9b-it:floor",
             messages=[{"role": "user", "content": judge_prompt}]
         )
         evaluation_text = judge_res.choices[0].message.content.strip()
