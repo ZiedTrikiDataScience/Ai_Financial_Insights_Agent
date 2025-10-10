@@ -6,26 +6,17 @@ Steps to install it :
 
 2* Create a virtual environment :
 
-    python -m venv genai_financial_app
+    python -m venv NAME_OF_YOUR_ENVIRONMENT
 
 3* Activate it : 
 
-    genai_financial_app\Scripts\activate
+    NAME_OF_YOUR_ENVIRONMENT\Scripts\activate
 
 4* Install requirments.txt :
 
     pip install -r requirements.txt
 
 
+5* Run the app through : 
 
-* Example Generated Themes : 
-
-Theme 1: Automotive, Trade, Insolvency Trends
-
-Theme 2: Market Movements Amid Geopolitics
-
-Theme 3: Retailer restructures to avoid collapse
-
-Theme 4: Financial Compliance Enforcement
-
-Theme 5: Economic policy amid geopolitical tensions
+    streamlit run Clustering_Financial_Insights_Generation_Streamlit
